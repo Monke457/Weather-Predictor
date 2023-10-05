@@ -31,7 +31,6 @@ core_weather["pressure"] = core_weather["pressure"].fillna(101790.0)
 mean_temps = (core_weather["max_temp"] + core_weather["min_temp"]) / 2
 core_weather["mean_temp"] = core_weather["mean_temp"].fillna(mean_temps)
 
-
 # Add rolling means
 core_weather["rolling_max"] = core_weather["max_temp"].rolling(30).mean()
 core_weather = core_weather.iloc[30:, :].copy()
@@ -63,10 +62,10 @@ predictors = ["max_temp", "min_temp", "precipitation", "snow_depth", "rolling_ma
 reg = Ridge(alpha=.1)
 
 # Initialize a decision tree model.
-reg1 = DecisionTreeRegressor(random_state=0)
+reg_tree = DecisionTreeRegressor(random_state=0)
 
 # Initialize a random forest model
-reg2 = RandomForestRegressor(max_depth=90, random_state=0, n_estimators=100)
+reg_forest = RandomForestRegressor(max_depth=90, random_state=0, n_estimators=100)
 
 
 def create_predictions(features, data, model):
@@ -99,29 +98,27 @@ def create_predictions(features, data, model):
     return err, result
 
 
-error, combined = create_predictions(predictors, core_weather, reg)
+# Train model and generate predictions.
+error, combined = create_predictions(predictors, core_weather, reg_forest)
+
+# Print the results.
 print(error)
 print(combined)
 
-combined["diff"] = (combined["actual"] - combined["prediction"]).abs()
-print(combined.sort_values("diff", ascending=False))
-
+# Plot the predictions.
 combined.plot()
 plt.show()
 
 """
-## Prediction analysis.
+## Further analysis.
+
+# Show the difference between the predictions and target.
+combined["diff"] = (combined["actual"] - combined["prediction"]).abs()
+print(combined.sort_values("diff", ascending=False))
+
 # Show the weights for each predictor.
 print(reg.coef_)
 
 # Show predictor correlation
 print(core_weather.corr()["target"])
-
-# Plot the predictions.
-combined.plot()
-plt.show()
 """
-
-# print(core_weather.apply(pd.isnull).sum())
-# print(core_weather.groupby(core_weather.index.year).sum())
-
