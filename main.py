@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_absolute_error
 import matplotlib.pyplot as plt
 
@@ -67,13 +68,23 @@ reg_tree = DecisionTreeRegressor(random_state=0)
 # Initialize a random forest model
 reg_forest = RandomForestRegressor(max_depth=90, random_state=0, n_estimators=100)
 
+# Initialize a multi-layer perceptron regressor (neural network)
+params = {
+    'hidden_layer_sizes': [13, 13, 13],
+    'alpha': 0.1,
+    'random_state': 0,
+    'learning_rate_init': 0.005,
+    'shuffle': False
+}
+reg_mlp = MLPRegressor(**params)
+
 
 def create_predictions(features, data, model):
     """
     A function for predicting the daily maximum temperature using a regression model.
     :param features: an array of strings describing the columns of the data to use as predictors.
     :param data: a DataFrame object containing all the weather data.
-    :param model: the Ridge regression model for generating the predictions.
+    :param model: the machine learning model for generating the predictions.
     :return err: the average difference between the target values and predictions.
             result: DataFrame object containing the target values and predictions.
     """
@@ -99,7 +110,7 @@ def create_predictions(features, data, model):
 
 
 # Train model and generate predictions.
-error, combined = create_predictions(predictors, core_weather, reg_forest)
+error, combined = create_predictions(predictors, core_weather, reg_mlp)
 
 # Print the results.
 print(error)
