@@ -11,19 +11,19 @@ pd.set_option("display.max_columns", None)
 
 # Selects relevant columns, fills null values, sets datetime index
 # Stores as a pickle file
-# process.process_data("../data/london_weather.csv")
+process.process_data("../data/london_weather.csv")
 
 # Creates a new dataframe and applies a lowpass filter
 # Plots the results as a comparison
 # Stores as a pickle file
-# analyse.analyse_data("../data/london_weather.pkl")
+analyse.analyse_data("../data/london_weather.pkl")
 
 # Adds predictor columns to the dataset
 # Overwrites the pickle file
-# feat.engineer_features("../data/lowpass_weather.pkl")
+feat.engineer_features("../data/lowpass_weather.pkl")
 
 # Finds the 10 best predictors
-# predictors = select.find_predictors(filepath="../data/lowpass_weather.pkl")
+predictors = select.find_predictors(filepath="../data/lowpass_weather.pkl")
 
 # Trains models: Ridge, Decision Tree, Random Forest, MLP
 # Prints mean absolute errors
