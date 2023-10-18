@@ -14,7 +14,7 @@ def aggregate_value(function):
 
 def add_temporal_abstraction(df, columns, function):
     print(
-        f"adding temporal abstraction {function}"
+        f"    adding temporal abstraction {function}"
     )
     temporal_abstraction = (
         df[columns]
@@ -29,37 +29,50 @@ def add_temporal_abstraction(df, columns, function):
     return df_temp
 
 
-def engineer_features(filepath="../data/london_weather.pkl"):
+def engineer_features(filepath="../data/weather_processed.pkl"):
     print("engineering features...")
 
-    # Load the data.
+    # ---------------------------------------
+    # Load Data
+    # ---------------------------------------
     weather = pd.read_pickle(filepath)
 
-    # Set columns for temporal abstraction
+    # ---------------------------------------
+    # Temporal Abstraction
+    # ---------------------------------------
     columns = ["cloud_cover", "sunshine", "max_temp", "mean_temp", "min_temp", "precipitation",
                "pressure", "snow_depth"]
     aggregate_functions = ["std", "mean", "median"]
 
-    # Add temporal abstraction for each aggregate function
     for fun in aggregate_functions:
         weather = add_temporal_abstraction(weather, columns, fun)
 
-    # Take subset of data to avoid overfitting
-    weather = weather.iloc[::2]
-
-    # Add difference between max and min temperatures
+    # ---------------------------------------
+    # Differences and averages
+    # ---------------------------------------
     weather["max_min_diff"] = weather["max_temp"] - weather["min_temp"]
 
-    # Add monthly average
-    weather["monthly_avg"] = weather["max_temp"].groupby(weather.index.month) \
+    # Month of year average
+    weather["month_of_year_avg"] = weather["max_temp"].groupby(weather.index.month) \
         .transform(lambda x: x.expanding(1).mean())
 
-    # Add day of year average
+    # Day of year average
     weather["day_of_year_avg"] = weather["max_temp"].groupby(weather.index.day_of_year) \
         .transform(lambda x: x.expanding(1).mean())
 
+    # ---------------------------------------
+    # Export
+    # ---------------------------------------
     weather.to_pickle(filepath)
-
-    print(f"features generated -> {filepath}")
-
+    print(f"    features generated -> {filepath}")
     return weather
+
+
+"""
+def sum_of_squares(nums):
+    mean = np.mean(nums)
+    sos = 0
+    for x in nums:
+        sos += np.square(x - mean)
+    return np.sqrt(sos)
+"""

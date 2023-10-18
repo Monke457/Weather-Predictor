@@ -1,80 +1,74 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-from data_transformation import LowPassFilter
-
-LowPass = LowPassFilter()
+from sklearn.cluster import KMeans
 
 
-def apply_filter(df, fs, cutoff):
-    df_filtered = df.copy()
+def plot_elbow(data, max_clusters=10):
+    distortions = []  # To store the distortion (inertia) for different values of k
 
-    for col in df_filtered.columns:
-        df_filtered = LowPass.low_pass_filter(df_filtered, col, fs, cutoff)
-        df_filtered[col] = df_filtered[col + "_lowpass"]
-        del df_filtered[col + "_lowpass"]
+    for k in range(1, max_clusters + 1):
+        kmeans = KMeans(n_clusters=k, random_state=0, n_init=20)
+        kmeans.fit_predict(data)
+        distortions.append(kmeans.inertia_)
 
-    return df_filtered
-
-
-def plot_comparison(df, df_lp, col, year=2000, month=6):
-    subset_1 = df[df.index.year == year]
-    subset_2 = df_lp[df_lp.index.year == year]
-
-    plt.figure(figsize=(10, 5))
-    sns.lineplot(
-        data=subset_1,
-        x=subset_1.index,
-        y=col,
-        label=f"{col} before filter",
-    )
-    sns.lineplot(
-        data=subset_2,
-        x=subset_2.index,
-        y=col,
-        label=f"{col} after filter",
-    )
-    plt.xlabel("Date")
-    plt.ylabel("Celsius")
-    plt.title(f"Max Temperature {year} Before and After Lowpass Filter")
-    plt.show()
-
-    subset_1 = df[(df.index.year == year) & (df.index.month == month)]
-    subset_2 = df_lp[(df_lp.index.year == year) & (df_lp.index.month == month)]
-
-    plt.figure(figsize=(10, 5))
-    sns.lineplot(
-        data=subset_1,
-        x=subset_1.index,
-        y=col,
-        label=f"{col} before filter",
-    )
-    sns.lineplot(
-        data=subset_2,
-        x=subset_2.index,
-        y=col,
-        label=f"{col} after filter",
-    )
-    plt.xlabel("Date")
-    plt.ylabel("Celsius")
-    plt.title(f"Max Temperature {year} / {month} Before and After Lowpass Filter")
+    # Plot the elbow curve
+    plt.figure(figsize=(8, 6))
+    plt.plot(range(1, max_clusters + 1), distortions, marker='o')
+    plt.title('Elbow Method for Time Series Data')
+    plt.xlabel('Number of clusters')
+    plt.ylabel('Distortion (Inertia)')
+    plt.grid(True)
     plt.show()
 
 
-def analyse_data(filepath="../data/london_weather.pkl"):
+def plot_clustered_data(clustered_data):
+    num_clusters = len(clustered_data['cluster'].unique())
+
+    # Create a 3D plot
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    for cluster_id in range(num_clusters):
+        cluster = clustered_data[clustered_data['cluster'] == cluster_id]
+        ax.scatter(cluster["max_temp"], cluster["min_temp"], cluster["mean_temp"], label=f'Cluster {cluster_id}')
+
+    ax.set_xlabel('Max Temp')
+    ax.set_ylabel('Min Temp')
+    ax.set_zlabel('Mean Temp')
+    plt.title('Clustered Data in 3D')
+    plt.legend()
+    plt.show()
+
+
+def analyse_data(filepath="../data/weather_processed.pkl", plot=False):
     print("running data analysis...")
 
-    # Load the data.
+    # ---------------------------------------
+    # Load the data
+    # ---------------------------------------
     weather = pd.read_pickle(filepath)
 
     # ---------------------------------------
-    # Butterworth lowpass filter
+    # K Means Clustering
     # ---------------------------------------
-    weather_lowpass = apply_filter(weather, 10, 1.5)
-    plot_comparison(weather, weather_lowpass, "max_temp", 1996, 4)
+    weather_clustered = weather.copy()
+    cluster_columns = ["max_temp", "min_temp", "mean_temp"]
 
-    weather_lowpass.to_pickle("../data/lowpass_weather.pkl")
+    # Find the optimal number of clusters with an elbow curve
+    # plot_elbow(weather[cluster_columns])
 
-    print("lowpass created -> data/lowpass_weather.pkl")
-    return weather_lowpass
+    # Assign cluster values to data
+    kmeans = KMeans(n_clusters=4, random_state=0, n_init=20)
+    weather_clustered['cluster'] = kmeans.fit_predict(weather_clustered[cluster_columns])
+
+    # Plot cluster data
+    if plot:
+        plot_clustered_data(weather_clustered)
+
+    # ---------------------------------------
+    # Export
+    # ---------------------------------------
+    weather_clustered.to_pickle("../data/weather_analysis.pkl")
+    print("    weather processed -> data/weather_analysis.pkl")
+    return weather_clustered
 

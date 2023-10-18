@@ -8,33 +8,34 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def train_and_test_models(predictors=None, filepath="../data/london_weather.pkl"):
-    # Load the data
+def train_and_test_models(predictors=None, filepath="../data/weather_processed.pkl"):
+    # ---------------------------------------
+    # Load data
+    # ---------------------------------------
     weather = pd.read_pickle(filepath)
 
     # always load the original data set make sure the target values are correct
     weather_orig = pd.read_pickle("../data/london_weather.pkl")
 
-    print(weather.shape)
-
-    # Set the predictors (features)
+    # ---------------------------------------
+    # Set the predictors and target
+    # ---------------------------------------
     if predictors is None:
         predictors = weather.columns
 
-    # Set the target values from the original data
     weather["target"] = weather_orig.shift(-1)["max_temp"]
     weather = weather.iloc[:-1, :].copy()
 
-    # Initialize a ridge model
+    # Take subset of data to avoid overfitting
+    weather = weather.iloc[::2]
+
+    # ---------------------------------------
+    # Create Models
+    # ---------------------------------------
     reg_ridge = Ridge(alpha=.1)
-
-    # Initialize a decision tree model
     reg_tree = DecisionTreeRegressor(random_state=0)
-
-    # Initialize a random forest model
     reg_forest = RandomForestRegressor(max_depth=90, random_state=0, n_estimators=100)
 
-    # Initialize a multi-layer perceptron regressor (neural network)
     col_count = len(predictors)
     params = {
         'hidden_layer_sizes': [col_count, col_count, col_count],
@@ -48,15 +49,17 @@ def train_and_test_models(predictors=None, filepath="../data/london_weather.pkl"
     # Select which models to test
     models = [reg_ridge, reg_tree, reg_mlp, reg_forest]
 
+    # ---------------------------------------
+    # Start training and testing
+    # ---------------------------------------
     print("training and testing models...")
     for m in models:
         # Train model and generate predictions
         error, combined = create_predictions(predictors, weather, m)
 
-        modelName = m.__class__.__name__
-
         # Print the accuracy
-        print(f"{modelName} error: {error}")
+        modelName = m.__class__.__name__
+        print(f"{modelName} MAE: {error}")
 
         # Plot the predictions
         plt.figure(figsize=(10, 5))
