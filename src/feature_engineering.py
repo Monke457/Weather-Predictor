@@ -13,18 +13,12 @@ def aggregate_value(function):
 
 
 def add_temporal_abstraction(df, columns, function):
-    print(
-        f"    adding temporal abstraction {function}"
-    )
-    temporal_abstraction = (
-        df[columns]
-        .rolling(window=30, min_periods=1)
-        .apply(aggregate_value(function))
-    )
+    print(f"    adding temporal abstraction {function}")
 
-    df_temp = pd.concat(
-        [df, temporal_abstraction.add_suffix(f"_{function}_30")], axis=1
-    )
+    temporal_abstraction = (df[columns].rolling(window=30, min_periods=1)
+                            .apply(aggregate_value(function)))
+
+    df_temp = pd.concat([df, temporal_abstraction.add_suffix(f"_{function}_30")], axis=1)
 
     return df_temp
 
