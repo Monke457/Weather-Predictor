@@ -26,13 +26,13 @@ process.process_data()
 feat.engineer_features()
 
 # -----------------------------------------------------------------
-# Runs clustering analysis
-# Stores as a pickle file
+# Runs clustering analysis and PCA
+# Overwrites the pickle file
 # -----------------------------------------------------------------
-analyse.analyse_data(plot=True)
+analyse.analyse_data()
 
 # -----------------------------------------------------------------
-# Finds the 10 best predictors
+# Finds the 15 best predictors
 # -----------------------------------------------------------------
 predictors = select.find_predictors()
 
@@ -41,4 +41,4 @@ predictors = select.find_predictors()
 # Prints mean absolute errors
 # Plots results
 # -----------------------------------------------------------------
-models.train_and_test_models(filepath="../data/weather_analysis.pkl")
+models.create_and_test_models(predictors=predictors)

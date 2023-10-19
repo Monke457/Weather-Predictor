@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_selection import SelectKBest, f_regression
 
 
-def find_predictors(max_features=10, filepath="../data/weather_processed.pkl"):
+def find_predictors(max_features=15, filepath="../data/weather_processed.pkl"):
     print("finding best predictors...")
 
     # ---------------------------------------
