@@ -16,7 +16,8 @@ def analyse_data(filepath="../data/weather_processed.pkl", plot=False):
     cluster_columns = ["max_temp", "min_temp", "mean_temp"]
 
     # Find the optimal number of clusters with an elbow curve
-    plot_elbow_cluster(weather[cluster_columns])
+    if plot:
+        plot_elbow_cluster(weather[cluster_columns])
 
     # Assign cluster values to data
     kmeans = KMeans(n_clusters=4, random_state=0, n_init=20)
@@ -38,22 +39,13 @@ def analyse_data(filepath="../data/weather_processed.pkl", plot=False):
     # Find the optimal number of pca components
     pc_values = pca.determine_pc_explained_variance(
         weather_pca, predictor_columns)
-    plot_elbow(pc_values, len(predictor_columns),
-               'Number of components', 'Variance')
+    if plot:
+        plot_elbow(pc_values, len(predictor_columns),
+                   'Number of components', 'Variance')
 
     weather_pca = pca.apply_pca(weather_pca, predictor_columns, 4)
     if plot:
-        subset = weather_pca[weather_pca.index.year == 2000]
-        plt.figure(figsize=(10, 5))
-        sns.lineplot(data=subset, x=subset.index, y="pca_1", label="PCA 1")
-        sns.lineplot(data=subset, x=subset.index, y="pca_2", label="PCA 2")
-        sns.lineplot(data=subset, x=subset.index, y="pca_3", label="PCA 3")
-        sns.lineplot(data=subset, x=subset.index, y="pca_4", label="PCA 4")
-        plt.xlabel("Date")
-        plt.ylabel("Value")
-        plt.title(f"PCA Values for the year 2000")
-        plt.legend()
-        plt.show()
+        plot_pca(weather_pca)
 
     weather_pca.to_pickle(filepath)
     print(f"    weather analysis complete -> {filepath}")
@@ -98,5 +90,18 @@ def plot_clustered_data(clustered_data, columns):
     ax.set_ylabel(columns[1])
     ax.set_zlabel(columns[2])
     plt.title('Clustered Data in 3D')
+    plt.legend()
+    plt.show()
+
+
+def plot_pca(data):
+    plt.figure(figsize=(10, 5))
+    sns.lineplot(data=data, x=data.index, y="pca_1", label="PCA 1")
+    sns.lineplot(data=data, x=data.index, y="pca_2", label="PCA 2")
+    sns.lineplot(data=data, x=data.index, y="pca_3", label="PCA 3")
+    sns.lineplot(data=data, x=data.index, y="pca_4", label="PCA 4")
+    plt.xlabel("Date")
+    plt.ylabel("Value")
+    plt.title("PCA Values 1979 - 2020")
     plt.legend()
     plt.show()

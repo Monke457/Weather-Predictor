@@ -14,6 +14,7 @@ pd.set_option("display.max_columns", None)
 # -----------------------------------------------------------------
 # Selects relevant columns, fills null values, sets datetime index
 # Applies a lowpass filter
+# plot=True to print filter comparison
 # Stores original data as pickle file
 # Stores processed data as a pickle file
 # -----------------------------------------------------------------
@@ -27,6 +28,7 @@ feat.engineer_features()
 
 # -----------------------------------------------------------------
 # Runs clustering analysis and PCA
+# plot=True to plot elbows, 3-D cluster, and PCA graphs
 # Overwrites the pickle file
 # -----------------------------------------------------------------
 analyse.analyse_data()
