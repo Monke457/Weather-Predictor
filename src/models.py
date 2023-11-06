@@ -11,7 +11,7 @@ import seaborn as sns
 def create_and_test_models(predictors=None,
                           filepath="../data/weather_processed.pkl"):
     weather = pd.read_pickle(filepath)
-    # always load the original data set make sure the
+    # always load the original data set to make sure the
     # target values are correct
     weather_orig = pd.read_pickle("../data/london_weather.pkl")
 
