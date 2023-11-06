@@ -13,7 +13,6 @@ def find_predictors(max_features=15, filepath="../data/weather_processed.pkl"):
     # ---------------------------------------
     # Prepare Data
     # ---------------------------------------
-    # Set the target values from the original data
     weather["target"] = weather.shift(-1)["max_temp"]
     weather = weather.iloc[:-1, :].copy()
 
